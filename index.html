@@ -1007,7 +1007,7 @@ function renderApp(){
     </div>
 
     <div class="tabs">
-      ${['quests','army','titles','status','timer','calendar'].map(t=>`<button class="tab-btn${activeTab===t?' active':''}" onclick="switchTab('${t}')">${{quests:'Daily Quests',army:'Shadow Army',titles:'Titles',status:'Status Window',timer:'Focus Gate',calendar:'Dungeon Log'}[t]}</button>`).join('')}
+      ${['quests','army','titles','status','timer','calendar'].map(t=>`<button class="tab-btn${activeTab===t?' active':''}" onclick="(window._gatedSwitchTab||switchTab)('${t}')">${{quests:'Daily Quests',army:'Shadow Army',titles:'Titles',status:'Status Window',timer:'Focus Gate',calendar:'Dungeon Log'}[t]}</button>`).join('')}
     </div>
 
     <div id="panel-quests" class="panel${activeTab==='quests'?' active':''}">
@@ -1080,7 +1080,7 @@ function renderQuestsPanel(){
     <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted)">${filtered.length} quests</div>
   </div>
   <div class="quest-list">
-    ${filtered.length===0?'<div class="empty-state"><div>⚔</div>▸ No quests found.<br><span style='font-size:10px;opacity:.5'>Register your objectives, Shadow Monarch.</span></div>':filtered.map(t=>{
+    ${filtered.length===0?'<div class="empty-state"><div>⚔</div>No quests found — Register your objectives, Shadow Monarch.</div>':filtered.map(t=>{
       const ac=ACOLORS[t.attr]||'#1e90ff',al=ALABELS[t.attr]||'???',sol=SOLDIERS[t.attr]
       const realXP=computeXP(t)
       const cmdAvail=hasPriorityAvail()!==null
@@ -1478,8 +1478,9 @@ function playSound(type){
 
 
 // ── FEATURE 2: DUNGEON GATE PORTAL (tab switch) ────────────────────────────────
+// Gate portal wraps the original switchTab
 const _origSwitchTab = switchTab
-function switchTab(t){
+window._gatedSwitchTab = function(t){
   if(t===activeTab){_origSwitchTab(t);return}
   playSound('gate')
   const flash=document.createElement('div')
@@ -1545,20 +1546,20 @@ function checkSovereignMode(){
 
 // Hook sounds into existing functions
 const _origCompleteTask=completeTask
-function completeTask(id){
+window.completeTask=function(id){
   _resumeAC();playSound('quest');_origCompleteTask(id);checkSovereignMode()
 }
 const _origShowHunterRankup=showHunterRankup
-function showHunterRankup(ri){
+window.showHunterRankup=function(ri){
   playSound('rankup');_origShowHunterRankup(ri);setTimeout(checkSovereignMode,1200)
 }
 const _origShowTitleUnlock=showTitleUnlock
-function showTitleUnlock(t){
+window.showTitleUnlock=function(t){
   playSound('title');_origShowTitleUnlock(t)
 }
 const _origStartHunter=startHunter
-function startHunter(){
-  playSound('arise');_origStartHunter()
+window.startHunter=function(){
+  _resumeAC();playSound('arise');_origStartHunter()
 }
 
 // Boot sovereign check
