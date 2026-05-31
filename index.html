@@ -2346,7 +2346,7 @@ function renderApp(){
     </div>
 
     <div class="tabs">
-      ${['quests','army','dungeon','titles','status','timer','calendar'].map(t=>`<button class="tab-btn${activeTab===t?' active':''}" onclick="(window._gatedSwitchTab||switchTab)('${t}')">${{quests:'Daily Quests',army:'Shadow Army',dungeon:'Daily Dungeon',titles:'Titles',status:'Status Window',timer:'Focus Gate',calendar:'Dungeon Log'}[t]||t.toUpperCase()}</button>`).join('')}
+      ${['quests','army','dungeon','titles','status','timer','calendar'].map(t=>`<button class="tab-btn${activeTab===t?' active':''}" onclick="(window._gatedSwitchTab||switchTab)('${t}')">${{quests:'Daily Quests',army:'Shadow Army',dungeon:'Daily Dungeon',titles:'Titles',status:'Status Window',timer:'Focus Gate',calendar:'Dungeon Log'}[t]||t.charAt(0).toUpperCase()+t.slice(1)}</button>`).join('')}
     </div>
 
     <div id="panel-quests" class="panel${activeTab==='quests'?' active':''}">
@@ -2992,7 +2992,7 @@ window.confirmName      = confirmName;
 window.skipName         = skipName;
 window.closeRankup      = closeRankup;
 window.timerToggle      = timerToggle;
-window.toggleAmbience   = function(){ _resumeAC(); toggleAmbience(); };
+window.toggleAmbience   = function(){ if(typeof _resumeAC==='function') _resumeAC(); toggleAmbience(); };
 window.timerReset       = timerReset;
 window.setPreset        = setPreset;
 window.calNav           = calNav;
@@ -3002,8 +3002,6 @@ window.openNaming       = openNaming;
 window.dismissTitleUnlock = dismissTitleUnlock;
 window.equipFromUnlock  = equipFromUnlock;
 window.completeTask     = function(taskId){
-  // BUG 2 FIX: snapshot diff BEFORE completion; read task.xp AFTER (completeTask stores it).
-  // Do NOT re-run computeXP() on the already-done task — priority/morningBonus are stale.
   const task=G&&G.tasks&&G.tasks.find(t=>t.id==taskId);
   if(!task||task.done)return;
   completeTask(taskId);
@@ -3102,6 +3100,7 @@ function drawStreakFire(canvas,streak){
   else{inner='#ffee44';mid='rgba(255,80,0,.8)';outer='rgba(200,30,0,0)';}
   const fH=10+s*18;
   for(let L=3;L>=0;L--){
+    if(!isFinite(fH)||fH<=0) continue;
     const g=ctx.createRadialGradient(12,32-L*1.5,0,12,32,fH*(1+L*.18));
     g.addColorStop(0,inner);g.addColorStop(.42,mid);g.addColorStop(1,outer);
     ctx.globalAlpha=.28+L*.16;ctx.beginPath();
@@ -3317,10 +3316,12 @@ resetIdleTimer();
   let t=0;
   function draw(){
     requestAnimationFrame(draw);
+    if(!W||!H||W<10||H<10) return;
     ctx.clearRect(0,0,W,H);
     t+=.016;
 
     // Background gradient
+    if(!isFinite(W*mouseX)||W<=0||H<=0) return;
     const grd=ctx.createRadialGradient(W*mouseX,H*mouseY,0,W*.5,H*.5,W*.8);
     grd.addColorStop(0,'rgba(15,8,40,.95)');
     grd.addColorStop(.5,'rgba(5,3,15,.98)');
@@ -3331,6 +3332,7 @@ resetIdleTimer();
     clouds.forEach(cl=>{
       const px=(cl.x+Math.sin(t*cl.speed+cl.phase)*.02+(mouseX-.5)*(.02*cl.depth))*W;
       const py=(cl.y+Math.cos(t*cl.speed*.7+cl.phase)*.015+(mouseY-.5)*(.015*cl.depth))*H;
+      if(!isFinite(px)||!isFinite(py)||!isFinite(cl.r)||cl.r<=0) return;
       const g=ctx.createRadialGradient(px,py,0,px,py,cl.r);
       g.addColorStop(0,`rgba(${cl.color},${cl.opacity})`);
       g.addColorStop(1,'rgba(0,0,0,0)');
@@ -3794,7 +3796,7 @@ function buildDnaSvg(vals, size=260){
   const dataPts=[];
   for(let i=0;i<n;i++){
     const a=(i/n)*Math.PI*2-Math.PI/2;
-    const r=maxR*(vals[i]/100);
+    const r=maxR*(isFinite(vals[i]/100)?vals[i]/100:0);
     dataPts.push(`${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`);
   }
   const gradient=`dnaGrad${Date.now().toString(36).slice(-4)}`;
