@@ -1177,6 +1177,486 @@ body.sovereign .panel:hover{
   100%{opacity:1;transform:scale(1) translateY(0);filter:blur(0)}
 }
 
+
+/* ══ STAT DNA RADAR CHART ═════════════════════════════════════════════════ */
+.dna-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;padding:16px 0}
+.dna-canvas-wrap{position:relative;width:280px;height:280px}
+#dnaSvg{width:280px;height:280px;overflow:visible}
+.dna-axis-label{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;fill:rgba(200,216,248,.5);text-anchor:middle}
+.dna-value-label{font-family:'Share Tech Mono',monospace;font-size:10px;fill:rgba(200,216,248,.8);text-anchor:middle}
+.dna-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:400px}
+.dna-stat{background:rgba(10,5,30,.8);border-radius:6px;padding:10px;text-align:center;border:1px solid rgba(123,47,255,.15)}
+.dna-stat-val{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;line-height:1}
+.dna-stat-lbl{font-size:9px;letter-spacing:2px;color:rgba(200,216,248,.4);margin-top:3px;display:block;font-family:'Share Tech Mono',monospace}
+.dna-profile-label{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:rgba(123,47,255,.7);text-align:center}
+.dna-dominance{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(200,216,248,.5);text-align:center;margin-top:4px}
+
+/* ══ DAILY DUNGEON ════════════════════════════════════════════════════════ */
+.dd-wrap{padding:4px 0}
+.dd-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.dd-title-block{display:flex;flex-direction:column;gap:3px}
+.dd-title{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:2px;color:#e8f0ff}
+.dd-subtitle{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(200,216,248,.4);letter-spacing:2px}
+.dd-timer{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;padding:6px 14px;border-radius:4px;background:rgba(255,34,102,.08);border:1px solid rgba(255,34,102,.25);color:#ff4466}
+.dd-timer.urgent{animation:ddUrgent 1s ease infinite}
+@keyframes ddUrgent{0%,100%{border-color:rgba(255,34,102,.25)}50%{border-color:rgba(255,34,102,.7);box-shadow:0 0 10px rgba(255,34,102,.3)}}
+
+.dd-quests{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.dd-quest{background:rgba(10,5,30,.85);border-radius:8px;padding:14px 16px;border:1px solid rgba(123,47,255,.2);position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s}
+.dd-quest:hover:not(.done){border-color:rgba(123,47,255,.5);transform:translateX(3px)}
+.dd-quest.done{opacity:.55;border-color:rgba(0,200,100,.2)}
+.dd-quest::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--dc,rgba(123,47,255,.6))}
+.dd-quest-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.dd-quest-name{font-size:13px;font-weight:600;color:#e8f0ff;line-height:1.4}
+.dd-quest-done-mark{font-size:18px;color:#00dd88;flex-shrink:0}
+.dd-quest-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dd-quest-rank{font-family:'Orbitron',monospace;font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700}
+.dd-quest-attr{font-size:10px;font-family:'Share Tech Mono',monospace;letter-spacing:1px}
+.dd-quest-xp{font-family:'Orbitron',monospace;font-size:10px;color:var(--gold);margin-left:auto}
+.dd-quest-bar-bg{height:3px;background:rgba(123,47,255,.12);border-radius:2px;margin-top:8px;overflow:hidden}
+.dd-quest-bar-fill{height:100%;border-radius:2px;background:var(--dc,rgba(123,47,255,.6));transition:width .8s ease}
+.dd-quest.done .dd-quest-bar-fill{width:100%!important;background:#00dd88}
+
+.dd-reward{background:rgba(255,204,0,.06);border:1px solid rgba(255,204,0,.2);border-radius:8px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.dd-reward-text{font-family:'Orbitron',monospace;font-size:11px;color:rgba(255,204,0,.8);letter-spacing:1px}
+.dd-reward-xp{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;color:#ffcc00}
+.dd-claim-btn{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;padding:8px 18px;border-radius:4px;background:rgba(255,204,0,.12);border:1px solid rgba(255,204,0,.4);color:#ffcc00;cursor:pointer;transition:background .2s}
+.dd-claim-btn:hover{background:rgba(255,204,0,.22)}
+.dd-claim-btn:disabled{opacity:.3;cursor:default}
+.dd-claimed{color:rgba(0,200,100,.7);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px}
+
+.dd-empty{text-align:center;padding:40px 20px;color:rgba(200,216,248,.25);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px}
+.dd-progress{display:flex;gap:8px;margin-bottom:20px;align-items:center}
+.dd-prog-ring{width:12px;height:12px;border-radius:50%;border:2px solid rgba(123,47,255,.3);transition:all .3s}
+.dd-prog-ring.complete{background:#00dd88;border-color:#00dd88;box-shadow:0 0 8px rgba(0,221,136,.5)}
+.dd-prog-ring.active{border-color:rgba(123,47,255,.7);animation:ddRingPulse 1.5s ease infinite}
+@keyframes ddRingPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 8px rgba(123,47,255,.5)}}
+.dd-prog-line{flex:1;height:1px;background:rgba(123,47,255,.15)}
+.dd-prog-text{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(200,216,248,.4);letter-spacing:1px}
+
+.dd-new-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;letter-spacing:2px;color:#ff2266;border:1px solid rgba(255,34,102,.4);padding:2px 8px;border-radius:3px;background:rgba(255,34,102,.08);animation:buffPulse 2s ease infinite}
+
+/* Stat DNA on status panel */
+.status-dna-section{margin-top:20px;padding-top:20px;border-top:1px solid rgba(123,47,255,.15)}
+.status-dna-title{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:rgba(123,47,255,.6);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.status-dna-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(123,47,255,.3),transparent)}
+
+
+/* ══ MISSION BOARD ════════════════════════════════════════════════════════ */
+
+/* Board header */
+.mb-board-header{
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:4px;
+  color:rgba(123,47,255,.5);text-align:center;padding:6px 0 12px;
+  border-bottom:1px solid rgba(123,47,255,.1);margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+}
+.mb-board-header::before,.mb-board-header::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(123,47,255,.25),transparent);
+}
+
+/* S-rank wanted poster */
+.mb-wanted{
+  background:linear-gradient(160deg,rgba(20,12,4,.95),rgba(12,8,3,.95));
+  border:1px solid rgba(255,204,0,.35);border-radius:6px;padding:0;
+  margin-bottom:10px;position:relative;overflow:hidden;cursor:pointer;
+  transition:transform .15s,box-shadow .2s;
+}
+.mb-wanted:hover:not(.done){
+  transform:translateY(-2px);
+  box-shadow:0 6px 30px rgba(255,204,0,.2),0 0 0 1px rgba(255,204,0,.25);
+}
+.mb-wanted.done{opacity:.45;filter:grayscale(.4)}
+.mb-wanted-top{
+  background:rgba(255,204,0,.08);border-bottom:1px solid rgba(255,204,0,.2);
+  padding:6px 14px;display:flex;align-items:center;justify-content:space-between;
+}
+.mb-wanted-label{
+  font-family:'Orbitron',monospace;font-size:8px;letter-spacing:4px;
+  color:rgba(255,204,0,.6);
+}
+.mb-wanted-xp{
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:700;
+  color:#ffcc00;text-shadow:0 0 10px rgba(255,204,0,.5);
+}
+.mb-wanted-body{padding:10px 14px 12px;display:flex;align-items:flex-start;gap:12px}
+.mb-wanted-skull{font-size:28px;opacity:.7;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(255,204,0,.4))}
+.mb-wanted-content{flex:1;min-width:0}
+.mb-wanted-name{
+  font-size:14px;font-weight:700;color:#f0d890;line-height:1.3;margin-bottom:6px;
+}
+.mb-wanted-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.mb-wanted-check{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.3);
+  font-size:14px;color:#ffcc00;align-self:center;
+}
+.mb-wanted.done .mb-wanted-skull{opacity:.3}
+.mb-wanted.done .mb-wanted-check{background:rgba(0,200,100,.15);border-color:rgba(0,200,100,.4);color:#00dd88}
+/* Gold corner ornaments */
+.mb-wanted::before{
+  content:'✦';position:absolute;top:6px;left:8px;
+  font-size:10px;color:rgba(255,204,0,.2);pointer-events:none;
+}
+.mb-wanted::after{
+  content:'✦';position:absolute;top:6px;right:8px;
+  font-size:10px;color:rgba(255,204,0,.2);pointer-events:none;
+}
+
+/* A-rank notice board */
+.mb-notice{
+  background:rgba(12,6,28,.9);border:1px solid rgba(255,102,0,.25);
+  border-radius:6px;padding:10px 14px;margin-bottom:8px;
+  position:relative;overflow:hidden;cursor:pointer;
+  transition:transform .12s,border-color .15s;display:flex;align-items:center;gap:12px;
+}
+.mb-notice:hover:not(.done){transform:translateX(3px);border-color:rgba(255,102,0,.5)}
+.mb-notice.done{opacity:.4;filter:grayscale(.3)}
+.mb-notice::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--nc,rgba(255,102,0,.8))}
+.mb-notice-rank{
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:900;
+  color:var(--nc,#ff6600);flex-shrink:0;width:24px;text-align:center;
+}
+.mb-notice-name{flex:1;font-size:13px;color:#e0e8f8;line-height:1.4}
+.mb-notice-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.mb-notice-xp{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--nc,#ff6600)}
+.mb-notice-attr{font-size:9px;letter-spacing:1px;color:rgba(200,216,248,.35)}
+
+/* Standard rank cards (B/C/D/E) — paper scraps */
+.mb-card{
+  background:rgba(8,5,20,.8);border-radius:4px;padding:8px 12px;
+  margin-bottom:6px;position:relative;cursor:pointer;
+  display:flex;align-items:center;gap:10px;
+  border-left:2px solid var(--mc,rgba(123,47,255,.4));
+  border-top:1px solid rgba(123,47,255,.08);
+  border-right:1px solid rgba(123,47,255,.08);
+  border-bottom:1px solid rgba(123,47,255,.08);
+  transition:background .15s,border-left-color .15s;
+}
+.mb-card:hover:not(.done){background:rgba(15,8,35,.9);border-left-color:var(--mc,rgba(123,47,255,.8))}
+.mb-card.done{opacity:.35}
+.mb-card.priority{border-left-color:#ff6600!important;background:rgba(255,102,0,.04)!important}
+.mb-card-rank{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:var(--mc);flex-shrink:0}
+.mb-card-name{flex:1;font-size:12px;color:rgba(200,216,248,.85);line-height:1.4}
+.mb-card-xp{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(200,216,248,.35);flex-shrink:0}
+.mb-card-check{font-size:12px;color:#00dd88;flex-shrink:0}
+.mb-card-daily{font-size:8px;letter-spacing:1px;color:var(--cyan);opacity:.6;flex-shrink:0}
+
+/* Section dividers */
+.mb-divider{
+  display:flex;align-items:center;gap:10px;margin:14px 0 10px;
+}
+.mb-divider-label{
+  font-family:'Orbitron',monospace;font-size:8px;letter-spacing:3px;
+  color:rgba(200,216,248,.25);white-space:nowrap;
+}
+.mb-divider-line{flex:1;height:1px;background:rgba(123,47,255,.08)}
+
+/* Done section toggle */
+.mb-done-toggle{
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
+  color:rgba(200,216,248,.25);cursor:pointer;padding:8px 0;
+  display:flex;align-items:center;gap:8px;transition:color .2s;
+}
+.mb-done-toggle:hover{color:rgba(200,216,248,.5)}
+
+/* ══ SURVIVAL CHAIN STREAK ════════════════════════════════════════════════ */
+.streak-chain-wrap{
+  display:inline-flex;align-items:center;gap:2px;
+  background:rgba(8,4,24,.85);border:1px solid rgba(123,47,255,.2);
+  border-radius:20px;padding:4px 10px 4px 6px;
+  cursor:default;position:relative;overflow:hidden;
+}
+.streak-chain-wrap:hover .streak-tooltip{opacity:1;transform:translateY(0)}
+.chain-ring{
+  width:14px;height:14px;border-radius:50%;flex-shrink:0;
+  border:2px solid var(--rc,rgba(123,47,255,.4));
+  background:var(--rb,transparent);
+  position:relative;transition:all .3s;
+  display:flex;align-items:center;justify-content:center;
+}
+.chain-ring.lit{
+  background:var(--rc,rgba(123,47,255,.6));
+  box-shadow:0 0 6px var(--rc,rgba(123,47,255,.5));
+  animation:chainGlow 2s ease infinite;
+}
+.chain-ring.link{width:6px;height:6px;border-radius:2px;margin:0 -1px}
+.chain-ring.link.lit{background:var(--rc,rgba(123,47,255,.5));border:none}
+.chain-ring.link:not(.lit){background:rgba(123,47,255,.12);border:none}
+@keyframes chainGlow{0%,100%{box-shadow:0 0 4px var(--rc)}50%{box-shadow:0 0 10px var(--rc),0 0 20px var(--rc,rgba(123,47,255,.3))}}
+.chain-count{
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:700;
+  margin-left:4px;color:var(--cc,rgba(200,216,248,.7));
+}
+.chain-label{font-size:9px;color:rgba(200,216,248,.35);letter-spacing:1px;margin-left:2px;font-family:'Share Tech Mono',monospace}
+
+/* Fire colors for high streaks */
+.streak-chain-wrap.fire-1 .chain-ring.lit{--rc:#ff6600;--rb:rgba(255,102,0,.5)}
+.streak-chain-wrap.fire-2 .chain-ring.lit{--rc:#1e90ff;--rb:rgba(30,144,255,.5)}
+.streak-chain-wrap.fire-3 .chain-ring.lit{--rc:#7b2fff;--rb:rgba(123,47,255,.6)}
+.streak-chain-wrap.fire-1{border-color:rgba(255,102,0,.3)}
+.streak-chain-wrap.fire-2{border-color:rgba(30,144,255,.3)}
+.streak-chain-wrap.fire-3{border-color:rgba(123,47,255,.4);box-shadow:0 0 15px rgba(123,47,255,.2)}
+
+/* Shatter animation on break */
+@keyframes chainShatter{
+  0%{transform:scale(1);opacity:1}
+  30%{transform:scale(1.3) rotate(10deg);filter:brightness(2)}
+  100%{transform:scale(0) rotate(-20deg);opacity:0}
+}
+.chain-ring.shatter{animation:chainShatter .5s ease forwards!important}
+
+/* Streak tooltip */
+.streak-tooltip{
+  position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);
+  background:rgba(10,5,30,.95);border:1px solid rgba(123,47,255,.3);
+  border-radius:6px;padding:6px 12px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  color:rgba(200,216,248,.7);white-space:nowrap;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;z-index:100;
+}
+.streak-tooltip::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:rgba(123,47,255,.3);
+}
+
+
+/* ══ DUNGEON RAID TIMER ══════════════════════════════════════════════════ */
+
+/* Raid mode overlay that wraps the whole timer panel */
+.raid-mode-active .timer-wrap{
+  position:relative;
+}
+.raid-mode-active .timer-circle-wrap svg circle[id="timerRing2"]{
+  stroke:url(#raidGrad)!important;
+  filter:drop-shadow(0 0 6px rgba(255,102,0,.6));
+}
+
+/* Dungeon atmosphere bar */
+.raid-atmo{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-radius:6px;margin-bottom:14px;
+  background:rgba(10,4,28,.9);border:1px solid rgba(123,47,255,.2);
+  position:relative;overflow:hidden;
+  transition:all .4s;
+}
+.raid-atmo::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(123,47,255,.04),transparent,rgba(30,144,255,.04));
+  animation:raidAtmoFlow 4s ease infinite;
+}
+@keyframes raidAtmoFlow{0%,100%{opacity:.5}50%{opacity:1}}
+.raid-atmo.active{
+  border-color:rgba(255,102,0,.4);
+  background:rgba(20,8,4,.95);
+}
+.raid-atmo.active::before{
+  background:linear-gradient(90deg,rgba(255,60,0,.06),transparent,rgba(255,150,0,.04));
+  animation:raidActiveFlow 2s ease infinite;
+}
+@keyframes raidActiveFlow{0%,100%{opacity:.6}50%{opacity:1}}
+.raid-status{
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;
+  color:rgba(200,216,248,.35);
+  transition:color .4s;
+}
+.raid-status.active{color:rgba(255,102,0,.8);animation:buffPulse 2s ease infinite}
+.raid-depth{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  color:rgba(200,216,248,.3);letter-spacing:1px;
+}
+.raid-depth.active{color:rgba(255,150,0,.6)}
+
+/* Boss warning bar */
+.boss-warning{
+  display:none;padding:8px 14px;border-radius:6px;margin-bottom:10px;
+  background:rgba(255,20,20,.08);border:1px solid rgba(255,20,20,.3);
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
+  color:#ff4444;text-align:center;animation:bossWarnPulse 1s ease infinite;
+}
+.boss-warning.show{display:block}
+@keyframes bossWarnPulse{0%,100%{border-color:rgba(255,20,20,.3)}50%{border-color:rgba(255,20,20,.7);box-shadow:0 0 10px rgba(255,20,20,.2)}}
+
+/* Abandon penalty ghost */
+.abandon-ghost{
+  position:fixed;inset:0;z-index:99900;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0);transition:background .5s;
+}
+.abandon-ghost.show{background:rgba(0,0,0,.75);pointer-events:all}
+.abandon-ghost-box{
+  background:rgba(8,3,20,.97);border:1px solid rgba(255,20,20,.4);
+  border-radius:10px;padding:28px 32px;text-align:center;
+  max-width:320px;opacity:0;transform:scale(.85);
+  transition:all .3s cubic-bezier(.16,1,.3,1);
+}
+.abandon-ghost.show .abandon-ghost-box{opacity:1;transform:scale(1)}
+.abandon-ghost-title{
+  font-family:'Orbitron',monospace;font-size:14px;font-weight:900;
+  color:#ff4444;letter-spacing:2px;margin-bottom:8px;
+}
+.abandon-ghost-img{font-size:52px;margin:12px 0;filter:drop-shadow(0 0 15px rgba(255,20,20,.5))}
+.abandon-ghost-body{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  color:rgba(200,216,248,.55);line-height:1.7;margin-bottom:20px;
+  letter-spacing:.5px;
+}
+.abandon-ghost-btns{display:flex;gap:10px;justify-content:center}
+.abandon-keep-btn{
+  font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;
+  padding:9px 18px;border-radius:4px;cursor:pointer;
+  background:rgba(123,47,255,.15);border:1px solid rgba(123,47,255,.4);color:#9b6fff;
+  transition:background .2s;
+}
+.abandon-keep-btn:hover{background:rgba(123,47,255,.28)}
+.abandon-quit-btn{
+  font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;
+  padding:9px 18px;border-radius:4px;cursor:pointer;
+  background:rgba(255,20,20,.1);border:1px solid rgba(255,20,20,.3);color:#ff4444;
+  transition:background .2s;
+}
+.abandon-quit-btn:hover{background:rgba(255,20,20,.2)}
+
+/* Timer ring — raid mode gradient */
+.raid-ring-grad{stop-color:#ff6600}
+.raid-ring-grad-end{stop-color:#ffcc00}
+
+/* Progress particles during raid */
+.raid-particle{
+  position:absolute;border-radius:50%;pointer-events:none;
+  background:rgba(255,102,0,.7);animation:raidParticleFly var(--rpd) ease forwards;
+}
+@keyframes raidParticleFly{
+  0%{opacity:1;transform:translate(0,0) scale(1)}
+  100%{opacity:0;transform:translate(var(--rpx),var(--rpy)) scale(0)}
+}
+
+/* Timer entering/active label */
+.timer-enter-label{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Orbitron',monospace;font-size:clamp(9px,2vw,12px);
+  letter-spacing:3px;color:rgba(255,102,0,.8);
+  animation:raidLabelPulse 3s ease infinite;pointer-events:none;
+  top:calc(50% + 44px);
+}
+@keyframes raidLabelPulse{0%,100%{opacity:.7}50%{opacity:1}}
+
+/* ══ AI QUEST GENERATOR ════════════════════════════════════════════════════ */
+.qgen-wrap{
+  margin-top:0;padding:16px 0 0;
+}
+.qgen-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;
+}
+.qgen-title{
+  font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;
+  color:rgba(123,47,255,.7);
+}
+.qgen-title::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,rgba(123,47,255,.3),transparent);
+  display:block;margin-top:2px;
+}
+.qgen-ko{
+  font-family:'Noto Sans KR',sans-serif;font-size:9px;
+  color:rgba(123,47,255,.35);letter-spacing:2px;margin-left:auto;
+}
+.qgen-form{
+  background:rgba(8,4,24,.85);border:1px solid rgba(123,47,255,.2);
+  border-radius:8px;padding:14px;margin-bottom:12px;
+}
+.qgen-input-wrap{display:flex;gap:8px;margin-bottom:10px}
+.qgen-input{
+  flex:1;background:rgba(5,2,18,.9);border:1px solid rgba(123,47,255,.25);
+  border-radius:4px;padding:10px 12px;font-family:'Rajdhani',sans-serif;
+  font-size:13px;color:var(--text);outline:none;
+  transition:border-color .2s;
+}
+.qgen-input:focus{border-color:rgba(123,47,255,.6)}
+.qgen-input::placeholder{color:rgba(200,216,248,.25)}
+.qgen-btn{
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;
+  padding:0 16px;border-radius:4px;cursor:pointer;white-space:nowrap;
+  background:rgba(123,47,255,.15);border:1px solid rgba(123,47,255,.4);
+  color:#9b6fff;transition:background .2s;flex-shrink:0;
+}
+.qgen-btn:hover{background:rgba(123,47,255,.28)}
+.qgen-btn:disabled{opacity:.4;cursor:default}
+.qgen-options{display:flex;gap:8px;flex-wrap:wrap}
+.qgen-chip{
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;
+  padding:4px 10px;border-radius:12px;cursor:pointer;
+  background:rgba(123,47,255,.08);border:1px solid rgba(123,47,255,.2);
+  color:rgba(200,216,248,.5);transition:all .2s;
+}
+.qgen-chip.active{
+  background:rgba(123,47,255,.2);border-color:rgba(123,47,255,.5);
+  color:rgba(200,216,248,.85);
+}
+.qgen-result{
+  background:rgba(8,4,24,.85);border:1px solid rgba(123,47,255,.2);
+  border-radius:8px;padding:14px;
+}
+.qgen-result-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.qgen-result-label{
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;
+  color:rgba(123,47,255,.6);
+}
+.qgen-loading{
+  display:flex;align-items:center;gap:10px;padding:16px 0;
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  color:rgba(200,216,248,.4);letter-spacing:2px;
+}
+.qgen-loading-dots::after{
+  content:'';animation:loadDots 1.4s ease infinite;
+}
+@keyframes loadDots{0%{content:'.'}33%{content:'..'}66%{content:'...'}100%{content:''}}
+.qgen-quest-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:6px;margin-bottom:6px;cursor:pointer;
+  background:rgba(5,2,18,.6);border:1px solid rgba(123,47,255,.12);
+  transition:border-color .2s,background .2s;
+}
+.qgen-quest-item:hover{
+  border-color:rgba(123,47,255,.4);background:rgba(10,5,30,.8);
+}
+.qgen-quest-item.added{
+  border-color:rgba(0,200,100,.3);background:rgba(0,200,100,.04);
+  opacity:.6;pointer-events:none;
+}
+.qgen-quest-rank{
+  font-family:'Orbitron',monospace;font-size:10px;font-weight:700;
+  flex-shrink:0;width:20px;
+}
+.qgen-quest-name{
+  flex:1;font-size:12px;color:rgba(200,216,248,.8);line-height:1.4;
+}
+.qgen-quest-attr{
+  font-size:9px;letter-spacing:1px;flex-shrink:0;
+}
+.qgen-quest-add{
+  font-size:10px;color:rgba(123,47,255,.6);flex-shrink:0;
+  transition:color .2s;
+}
+.qgen-quest-item:hover .qgen-quest-add{color:rgba(123,47,255,1)}
+.qgen-quest-item.added .qgen-quest-add{color:#00dd88}
+.qgen-add-all-btn{
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;
+  padding:8px 16px;border-radius:4px;cursor:pointer;margin-top:10px;
+  background:rgba(0,200,100,.1);border:1px solid rgba(0,200,100,.3);
+  color:#00dd88;width:100%;transition:background .2s;
+}
+.qgen-add-all-btn:hover{background:rgba(0,200,100,.18)}
+.qgen-error{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  color:#ff4444;letter-spacing:1px;padding:10px 0;text-align:center;
+}
+
 </style>
 </head>
 <body>
@@ -1394,6 +1874,7 @@ function makeDefault(){return{
   soldiers:Object.fromEntries(SKEYS.map(k=>[k,{xp:0,rankIndex:0,kills:0,questsCompleted:0,name:null,named:false,priorityUsedToday:null}])),
   tasks:[],earnedTitles:[],equippedTitle:null,rankHistory:[],dayLog:{},focusLog:[],
   streakShieldUsed:null,dailyCompleteStreak:0,morningBurstRecord:0,morningSpiritual:0,
+  dailyDungeon:{date:null,quests:[],claimed:false},
   startDate:new Date().toLocaleDateString(),
 }}
 
@@ -1846,7 +2327,7 @@ function renderApp(){
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
         <div class="stat-pill">LVL ${G.level}</div>
-        <div class="stat-pill">STREAK: ${G.streak}</div>
+        ${buildStreakChain(G.streak)}
       </div>
     </div>
 
@@ -1857,7 +2338,7 @@ function renderApp(){
     </div>
 
     <div class="tabs">
-      ${['quests','army','titles','status','timer','calendar'].map(t=>`<button class="tab-btn${activeTab===t?' active':''}" onclick="(window._gatedSwitchTab||switchTab)('${t}')">${{quests:'Daily Quests',army:'Shadow Army',titles:'Titles',status:'Status Window',timer:'Focus Gate',calendar:'Dungeon Log'}[t]}</button>`).join('')}
+      ${['quests','army','dungeon','titles','status','timer','calendar'].map(t=>`<button class="tab-btn${activeTab===t?' active':''}" onclick="(window._gatedSwitchTab||switchTab)('${t}')">${{quests:'Daily Quests',army:'Shadow Army',titles:'Titles',status:'Status Window',timer:'Focus Gate',calendar:'Dungeon Log'}[t]}</button>`).join('')}
     </div>
 
     <div id="panel-quests" class="panel${activeTab==='quests'?' active':''}">
@@ -1866,6 +2347,7 @@ function renderApp(){
     <div id="panel-army" class="panel${activeTab==='army'?' active':''}">
       ${renderArmyPanel()}
     </div>
+    <div id="panel-dungeon" class="panel${activeTab==='dungeon'?' active':''}">${activeTab==='dungeon'?renderDungeonPanel():''}</div>
     <div id="panel-titles" class="panel${activeTab==='titles'?' active':''}">
       ${renderTitlesPanel()}
     </div>
@@ -1920,38 +2402,19 @@ function renderQuestsPanel(){
       <button class="sl-btn sl-btn-gold" onclick="addTask(true)">+ DAILY</button>
     </div>
   </div>
+  <div id="qgenPanel">${renderQGenPanel()}</div>
   ${cmdSlots>0?`<div class="priority-commander-banner"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">👑</span><span class="pcb-text">Commander's Decree — ${cmdNames} (2× XP Priority Quest)</span></div><span class="pcb-uses">${cmdSlots} USE${cmdSlots>1?'S':''} TODAY</span></div>`:''}
   <div class="filter-row">
     ${['all','active','priority','done'].map(f=>`<button class="filter-btn${questFilter===f?' active':''}" onclick="setQFilter('${f}')">${f.charAt(0).toUpperCase()+f.slice(1)}</button>`).join('')}
     ${SKEYS.map(k=>`<button class="filter-btn${questFilter===k?' active':''}" style="color:${ACOLORS[k]}" onclick="setQFilter('${k}')">${ALABELS[k]}</button>`).join('')}
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-    <div class="section-title" style="margin-bottom:0">Active Quests</div>
+    <div class="section-title" style="margin-bottom:0"><span class="ko-label">임무 게시판</span>MISSION BOARD</div>
     <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted)">${filtered.length} quests</div>
   </div>
-  <div class="quest-list">
-    ${filtered.length===0?'<div class="empty-state"><div>⚔</div>No quests found — Register your objectives, Shadow Monarch.</div>':filtered.map(t=>{
-      const ac=ACOLORS[t.attr]||'#1e90ff',al=ALABELS[t.attr]||'???',sol=SOLDIERS[t.attr]
-      const realXP=computeXP(t)
-      const cmdAvail=hasPriorityAvail()!==null
-      const rankGemColor=t.diff==='S'?'#ffcc00':t.diff==='A'?'#ff6600':t.diff==='B'?'#aa44ff':t.diff==='C'?'#0099ff':'rgba(74,96,128,.6)'
-return`<div class="quest-item${t.done?' done':''}${t.priority&&!t.done?' priority':''}" style="--ac:${t.priority?'#ff6600':t.accent}" data-rank="${t.diff}" onclick="if(!${t.done})completeTask(${t.id})">
-        ${t.priority&&!t.done?'<div class="priority-glow"></div>':''}
-        <div class="quest-check">${t.done?'✓':''}</div>
-        <div style="min-width:0">
-          <div class="quest-name">${t.name}${t.daily?'<span style="font-size:9px;color:var(--cyan);opacity:.7;margin-left:4px">[DAILY]</span>':''}</div>
-          <div class="quest-meta">
-            <span class="tag t${t.diff}">${t.diff}-RANK</span>
-            <span class="attr-tag" style="color:${ac};border-color:${ac}50;background:${ac}12">${al} · ${sol?.classShort}</span>
-            ${t.priority?'<span class="priority-tag">👑 PRIORITY</span>':''}
-            <span class="xp-reward">${t.priority?`+${realXP} XP ×2`:`+${realXP} XP`}</span>
-            ${!t.done&&!t.priority&&cmdAvail?`<button class="priority-mark-btn" onclick="event.stopPropagation();markPriority(${t.id})">👑 MARK</button>`:''}
-          </div>
-          ${(t.time||t.duration)?`<div class="quest-time-row">${t.time?`<span class="quest-time-chip">⏰ ${t.time}</span>`:''}${t.duration?`<span class="quest-dur-chip">⏱ ${t.duration} min</span>`:''}</div>`:''}
-        </div>
-        <button class="delete-btn" onclick="event.stopPropagation();deleteTask(${t.id})">✕</button>
-      </div>`
-    }).join('')}
+  <div class="mission-board">
+    ${filtered.length===0?'<div class="empty-state"><div>⚔</div>No quests found — Register your objectives, Shadow Monarch.</div>':buildMissionBoard(filtered,computeXP,ACOLORS,AFULL,SOLDIERS,hasPriorityAvail,markPriority,deleteTask)}
+  </div>
   </div>`
 }
 function setQFilter(f){questFilter=f;render()}
@@ -2116,17 +2579,24 @@ function renderTimerPanel(){
   const mins=Math.floor(timerSecs/60),secs2=timerSecs%60
   const logs=G.focusLog||[]
   return`
-  <div class="timer-wrap">
-    <div class="timer-circle-wrap">
+  <div class="timer-wrap" id="raidTimerWrap">
+    <div class="raid-atmo" id="raidAtmo">
+      <span class="raid-status" id="raidStatus">— GATE CLOSED —</span>
+      <span class="raid-depth" id="raidDepth">SELECT A DUNGEON BELOW</span>
+    </div>
+    <div class="boss-warning" id="bossWarning">⚠ BOSS ROOM APPROACHING — DO NOT ABANDON ⚠</div>
+    <div class="timer-circle-wrap" style="position:relative">
       <svg width="180" height="180" style="transform:rotate(-90deg)">
+        <defs><linearGradient id="raidGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" class="raid-ring-grad"/><stop offset="100%" class="raid-ring-grad-end"/></linearGradient></defs>
         <circle cx="90" cy="90" r="80" fill="none" stroke="rgba(30,144,255,.1)" stroke-width="6"/>
         <circle id="timerRing2" cx="90" cy="90" r="80" fill="none" stroke="var(--blue)" stroke-width="6" stroke-dasharray="502.65" stroke-dashoffset="${(2*Math.PI*80)*(timerSecs/timerMax)}" stroke-linecap="round" class="progress-ring"/>
       </svg>
       <div class="timer-display" id="timerDisplay2">${String(mins).padStart(2,'0')}:${String(secs2).padStart(2,'0')}</div>
       <div class="timer-label-txt" id="timerLabelTxt2">${timerLabel}</div>
     </div>
+    </div>
     <div class="timer-controls">
-      <button class="sl-btn" id="timerStartBtn2" onclick="timerToggle()">${timerRunning?'⏸ PAUSE':'▶ ENTER GATE'}</button>
+      <button class="sl-btn" id="timerStartBtn2" onclick="window.raidTimerToggle()">${timerRunning?(window._raidActive?'⏸ PAUSE RAID':'⏸ PAUSE'):'▶ ENTER GATE'}</button>
       <button class="sl-btn" onclick="timerReset()">↺ RESET</button>
     </div>
     <div class="timer-presets">
@@ -3254,6 +3724,911 @@ const _prevRenderImg=window.render;
 window.render=function(){
   _prevRenderImg();
   requestAnimationFrame(()=>{ updateIdleImage(); loadCombatImages(); });
+};
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// SECTION 1A — STAT DNA RADAR CHART
+// ══════════════════════════════════════════════════════════════════════════
+const DNA_KEYS   = ['physique','vitality','intellect','willpower','charisma','spiritual'];
+const DNA_LABELS = ['PHY','VIT','INT','WIL','CHA','SPI'];
+const DNA_KO     = ['체력','활력','지능','의지','카리스마','영성'];
+const DNA_COLORS = {physique:'#ff4455',vitality:'#00ddaa',intellect:'#4488ff',willpower:'#ffaa22',charisma:'#dd44ff',spiritual:'#c8a0ff'};
+
+function getDnaValues(){
+  if(!G) return DNA_KEYS.map(()=>0);
+  // Use attrCounts (quests completed per attr) normalized to a 0-100 scale
+  const vals = DNA_KEYS.map(k=>G.attrCounts[k]||0);
+  const max = Math.max(...vals,1);
+  return vals.map(v=>Math.round((v/max)*100));
+}
+
+function getHunterProfile(vals){
+  const total = vals.reduce((a,b)=>a+b,0);
+  if(total===0) return {label:'UNAWAKENED',ko:'미각성',desc:'Begin your quests to reveal your path.'};
+  const sorted = [...vals].sort((a,b)=>b-a);
+  const top = sorted[0], second = sorted[1];
+  const topIdx = vals.indexOf(top);
+  const isBalanced = (top - sorted[sorted.length-1]) < 20;
+  if(isBalanced) return {label:'THE BALANCED ONE',ko:'균형 잡힌 자',desc:'All attributes grow in harmony — a true all-rounder.'};
+  const profiles = {
+    physique:{label:'WAR MACHINE',ko:'전쟁 기계',desc:'Physical dominance. You are built for the front lines.'},
+    vitality:{label:'IRON WILL',ko:'철의 의지',desc:'Endurance and recovery. You never stay down.'},
+    intellect:{label:'SHADOW TACTICIAN',ko:'그림자 전술가',desc:'Strategic mind. You outthink every dungeon.'},
+    willpower:{label:'MONARCH OF FOCUS',ko:'집중의 군주',desc:'Unbreakable discipline. Distractions cannot touch you.'},
+    charisma:{label:'SOVEREIGN COMMANDER',ko:'군주 지휘관',desc:'Leadership flows from you. Others follow naturally.'},
+    spiritual:{label:'SHADOW ORACLE',ko:'그림자 신탁',desc:'Attuned to deeper forces. Your intuition never fails.'},
+  };
+  return profiles[DNA_KEYS[topIdx]]||profiles.physique;
+}
+
+function buildDnaSvg(vals, size=260){
+  const cx=size/2, cy=size/2, n=6;
+  const rings=[.2,.4,.6,.8,1.0];
+  const maxR=size*.38;
+  let svg=`<svg id="dnaSvg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">`;
+  // Grid rings
+  rings.forEach(r=>{
+    const pts=[];
+    for(let i=0;i<n;i++){
+      const a=(i/n)*Math.PI*2-Math.PI/2;
+      pts.push(`${cx+Math.cos(a)*maxR*r},${cy+Math.sin(a)*maxR*r}`);
+    }
+    svg+=`<polygon points="${pts.join(' ')}" fill="none" stroke="rgba(123,47,255,${r===1?.12:.07})" stroke-width="${r===1?1:.5}"/>`;
+  });
+  // Axis lines
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2-Math.PI/2;
+    svg+=`<line x1="${cx}" y1="${cy}" x2="${cx+Math.cos(a)*maxR}" y2="${cy+Math.sin(a)*maxR}" stroke="rgba(123,47,255,.08)" stroke-width=".5"/>`;
+  }
+  // Data polygon with animated fill
+  const dataPts=[];
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2-Math.PI/2;
+    const r=maxR*(vals[i]/100);
+    dataPts.push(`${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`);
+  }
+  const gradient=`dnaGrad${Date.now().toString(36).slice(-4)}`;
+  svg+=`<defs>
+    <radialGradient id="${gradient}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(123,47,255,.45)"/>
+      <stop offset="100%" stop-color="rgba(30,144,255,.15)"/>
+    </radialGradient>
+  </defs>`;
+  svg+=`<polygon points="${dataPts.join(' ')}" fill="url(#${gradient})" stroke="rgba(123,47,255,.8)" stroke-width="1.5" stroke-linejoin="round"/>`;
+  // Value dots + axis labels + value text
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2-Math.PI/2;
+    const r=maxR*(vals[i]/100);
+    const color=Object.values(DNA_COLORS)[i];
+    const px=cx+Math.cos(a)*r, py=cy+Math.sin(a)*r;
+    // Dot at data point
+    if(vals[i]>0){
+      svg+=`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="4" fill="${color}" stroke="rgba(0,0,0,.4)" stroke-width="1"/>`;
+      svg+=`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="7" fill="${color}" opacity=".2"/>`;
+    }
+    // Axis label (outside ring)
+    const lx=cx+Math.cos(a)*(maxR+20), ly=cy+Math.sin(a)*(maxR+20);
+    const pct=vals[i];
+    svg+=`<text x="${lx.toFixed(1)}" y="${(ly-6).toFixed(1)}" class="dna-axis-label" fill="${color}" font-size="9" text-anchor="middle">${DNA_LABELS[i]}</text>`;
+    if(pct>0) svg+=`<text x="${lx.toFixed(1)}" y="${(ly+8).toFixed(1)}" class="dna-value-label" fill="${color}" font-size="9" text-anchor="middle">${pct}%</text>`;
+  }
+  // Center glow
+  svg+=`<circle cx="${cx}" cy="${cy}" r="4" fill="rgba(123,47,255,.6)"/><circle cx="${cx}" cy="${cy}" r="12" fill="rgba(123,47,255,.12)"/>`;
+  svg+='</svg>';
+  return svg;
+}
+
+function buildDnaHtml(size=260){
+  const vals=getDnaValues();
+  const profile=getHunterProfile(vals);
+  const total=vals.reduce((a,b)=>a+b,0);
+  const rows=DNA_KEYS.map((k,i)=>{
+    const color=DNA_COLORS[k];
+    const v=vals[i];
+    return`<div class="dna-stat" style="border-color:${color}25">
+      <div class="dna-stat-val" style="color:${color}">${G&&G.attrCounts[k]||0}</div>
+      <span class="dna-stat-lbl" style="color:${color}80">${DNA_KO[i]}</span>
+    </div>`;
+  });
+  return`<div class="dna-wrap">
+    <div style="font-size:10px;letter-spacing:3px;font-family:'Share Tech Mono',monospace;color:rgba(200,216,248,.3);margin-bottom:4px">— QUEST COMPLETION PROFILE —</div>
+    ${buildDnaSvg(vals,size)}
+    <div class="dna-profile-label">${profile.label}</div>
+    <div class="dna-dominance">${profile.ko} · ${profile.desc}</div>
+    <div class="dna-stat-row">${rows.join('')}</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// SECTION 1B — DAILY DUNGEON
+// ══════════════════════════════════════════════════════════════════════════
+const DD_TEMPLATES = [
+  // Physique challenges
+  {name:'Complete a workout — any form counts',         attr:'physique', diff:'C'},
+  {name:'Do 20 push-ups or equivalent exercise',        attr:'physique', diff:'D'},
+  {name:'Walk or run for at least 20 minutes',          attr:'physique', diff:'D'},
+  {name:'Stretch for 10 minutes — body maintenance',    attr:'physique', diff:'E'},
+  {name:'Lift weights or resistance train today',        attr:'physique', diff:'B'},
+  // Vitality challenges
+  {name:'Drink 8 glasses of water today',               attr:'vitality', diff:'D'},
+  {name:'Sleep before midnight and get 7+ hours',       attr:'vitality', diff:'C'},
+  {name:'Eat a healthy meal — no junk food today',      attr:'vitality', diff:'C'},
+  {name:'Take a 20-minute nap or deep rest',            attr:'vitality', diff:'E'},
+  {name:'Cook a meal from scratch',                     attr:'vitality', diff:'B'},
+  // Intellect challenges
+  {name:'Read for 30 minutes minimum',                  attr:'intellect', diff:'C'},
+  {name:'Study a new concept or skill',                 attr:'intellect', diff:'C'},
+  {name:'Complete a work or school task you have been avoiding', attr:'intellect', diff:'B'},
+  {name:'Watch something educational — no entertainment', attr:'intellect', diff:'D'},
+  {name:'Write down 3 things you learned today',        attr:'intellect', diff:'E'},
+  // Willpower challenges
+  {name:'No social media for the entire day',           attr:'willpower', diff:'A'},
+  {name:'Complete your top 3 priority tasks first',     attr:'willpower', diff:'B'},
+  {name:'Do one thing you have been procrastinating',   attr:'willpower', diff:'C'},
+  {name:'Wake up on first alarm — no snooze',           attr:'willpower', diff:'D'},
+  {name:'Focus for 25 minutes straight without distraction', attr:'willpower', diff:'C'},
+  // Charisma challenges
+  {name:'Reach out to someone you have not spoken to recently', attr:'charisma', diff:'C'},
+  {name:'Give a genuine compliment to 3 people',        attr:'charisma', diff:'D'},
+  {name:'Have a meaningful conversation — no phones',   attr:'charisma', diff:'B'},
+  {name:'Help someone without being asked',             attr:'charisma', diff:'C'},
+  {name:'Send an encouraging message to a family member', attr:'charisma', diff:'D'},
+  // Spiritual challenges
+  {name:'Pray or meditate for 15 minutes',              attr:'spiritual', diff:'C'},
+  {name:'Read scripture or spiritual text for 20 minutes', attr:'spiritual', diff:'C'},
+  {name:'Serve someone in your community today',        attr:'spiritual', diff:'B'},
+  {name:'Journal — write about gratitude',              attr:'spiritual', diff:'D'},
+  {name:'Attend or watch a faith service',              attr:'spiritual', diff:'B'},
+];
+
+function generateDailyDungeon(){
+  if(!G) return;
+  const today = new Date().toLocaleDateString();
+  if(G.dailyDungeon && G.dailyDungeon.date===today) return; // already generated today
+
+  // Find weakest 2 attrs by attrCounts, random 1 for variety
+  const sorted = DNA_KEYS.slice().sort((a,b)=>(G.attrCounts[a]||0)-(G.attrCounts[b]||0));
+  const weak1=sorted[0], weak2=sorted[1];
+  const rand=DNA_KEYS[Math.floor(Math.random()*DNA_KEYS.length)];
+  const targetAttrs=[weak1,weak2,rand];
+
+  // Pick one quest per target attr
+  const quests=targetAttrs.map((attr,i)=>{
+    const pool=DD_TEMPLATES.filter(t=>t.attr===attr);
+    const tpl=pool[Math.floor(Math.random()*pool.length)];
+    // Scale difficulty based on hunter rank
+    const ri=G.rankIndex;
+    let diff=tpl.diff;
+    if(ri>=3&&diff==='D') diff='C';
+    if(ri>=4&&diff==='C') diff='B';
+    if(ri>=5&&diff==='B') diff='A';
+    return {id:'dd_'+Date.now()+'_'+i, name:tpl.name, attr, diff, done:false,
+            xp:Math.round(XP_RANK[diff]*1.5), daily:true};
+  });
+
+  G.dailyDungeon={date:today, quests, claimed:false};
+  saveState();
+}
+
+function completeDDQuest(idx){
+  if(!G||!G.dailyDungeon) return;
+  const q=G.dailyDungeon.quests[idx];
+  if(!q||q.done) return;
+  q.done=true;
+  playSound('quest');
+  // Trigger combat slash animation
+  setTimeout(()=>triggerCombatSlash(q.xp,false),150);
+  // Feed entry
+  addFeedEntry(`+${q.xp} EXP`,'#00dd88','⚡ ');
+  // Check if all done
+  const allDone=G.dailyDungeon.quests.every(q=>q.done);
+  if(allDone){
+    playSound('rankup');
+    setTimeout(()=>{
+      showNotif({icon:'🌑',title:'DUNGEON CLEARED',body:'All daily challenges complete! Claim your reward.',color:'#ffcc00',duration:4000});
+    },800);
+  }
+  saveState();render();
+}
+
+function claimDDReward(){
+  if(!G||!G.dailyDungeon||G.dailyDungeon.claimed) return;
+  if(!G.dailyDungeon.quests.every(q=>q.done)) return;
+  G.dailyDungeon.claimed=true;
+  // Bonus XP = 50% of total quest XP
+  const totalXP=G.dailyDungeon.quests.reduce((s,q)=>s+q.xp,0);
+  const bonusXP=Math.round(totalXP*.5);
+  addHunterXP(bonusXP);
+  // Bonus soldier XP to weakest attr
+  const weakest=DNA_KEYS.slice().sort((a,b)=>(G.attrCounts[a]||0)-(G.attrCounts[b]||0))[0];
+  addSoldierXPFn(weakest, Math.round(bonusXP*.5));
+  playSound('arise');
+  showNotif({icon:'👑',title:'DUNGEON REWARD CLAIMED',body:`+${bonusXP} Bonus XP · Shadow Army strengthened`,color:'#ffcc00',duration:4000});
+  // Chance at title unlock
+  checkTitles();
+  saveState();render();
+}
+window.completeDDQuest=completeDDQuest;
+window.claimDDReward=claimDDReward;
+
+function getDDTimeLeft(){
+  const now=new Date();
+  const midnight=new Date(); midnight.setHours(24,0,0,0);
+  const diff=midnight-now;
+  const h=Math.floor(diff/3600000), m=Math.floor((diff%3600000)/60000);
+  return{h,m,urgent:h<2};
+}
+
+function renderDungeonPanel(){
+  if(!G) return '';
+  generateDailyDungeon();
+  const dd=G.dailyDungeon;
+  if(!dd||!dd.quests||dd.quests.length===0) return`<div class="dd-empty">⚔ NO DUNGEON SPAWNED YET<br>Return tomorrow for new challenges.</div>`;
+
+  const {h,m,urgent}=getDDTimeLeft();
+  const done=dd.quests.filter(q=>q.done).length;
+  const total=dd.quests.length;
+  const allDone=done===total;
+  const today=new Date().toLocaleDateString();
+  const isToday=dd.date===today;
+
+  // Progress rings
+  const rings=dd.quests.map((q,i)=>{
+    const cls=q.done?'complete':i===done?'active':'';
+    return`<div class="dd-prog-ring ${cls}"></div>${i<dd.quests.length-1?'<div class="dd-prog-line"></div>':''}`;
+  }).join('');
+
+  // Quest cards
+  const questCards=dd.quests.map((q,i)=>{
+    const color=DNA_COLORS[q.attr]||'#7b2fff';
+    const rankColor={S:'#ffcc00',A:'#ff6600',B:'#aa44ff',C:'#0099ff',D:'#00cc66',E:'#8a9ab0'}[q.diff]||'#888';
+    return`<div class="dd-quest ${q.done?'done':''}" style="--dc:${color}" onclick="${q.done?'':'window.completeDDQuest('+i+')'}">
+      <div class="dd-quest-top">
+        <div class="dd-quest-name">${q.name}</div>
+        ${q.done?'<div class="dd-quest-done-mark">✓</div>':''}
+      </div>
+      <div class="dd-quest-meta">
+        <span class="dd-quest-rank" style="background:${rankColor}18;color:${rankColor};border:1px solid ${rankColor}40">${q.diff}-RANK</span>
+        <span class="dd-quest-attr" style="color:${color}">${(AFULL[q.attr]||q.attr).toUpperCase()}</span>
+        <span class="dd-quest-xp">+${q.xp} XP</span>
+      </div>
+      <div class="dd-quest-bar-bg"><div class="dd-quest-bar-fill" style="width:${q.done?100:0}%"></div></div>
+    </div>`;
+  }).join('');
+
+  // Total reward XP
+  const totalXP=dd.quests.reduce((s,q)=>s+q.xp,0);
+  const bonusXP=Math.round(totalXP*.5);
+
+  return`<div class="dd-wrap">
+    <div class="dd-header">
+      <div class="dd-title-block">
+        <div class="dd-title">🌑 DAILY DUNGEON ${!isToday?'<span class="dd-new-badge">✦ NEW</span>':''}</div>
+        <div class="dd-subtitle">일일 던전 · ${done}/${total} CHALLENGES CLEARED</div>
+      </div>
+      <div class="dd-timer ${urgent?'urgent':''}">⏳ ${h}h ${m}m LEFT</div>
+    </div>
+    <div class="dd-progress">${rings}<span class="dd-prog-text" style="margin-left:8px">${done}/${total}</span></div>
+    <div class="dd-quests">${questCards}</div>
+    <div class="dd-reward">
+      <div>
+        <div class="dd-reward-text">◈ DUNGEON CLEAR REWARD</div>
+        <div style="font-size:10px;color:rgba(200,216,248,.35);font-family:'Share Tech Mono',monospace;margin-top:3px;letter-spacing:1px">Complete all 3 to claim bonus XP</div>
+      </div>
+      <div class="dd-reward-xp">+${bonusXP} XP</div>
+      ${dd.claimed?'<div class="dd-claimed">✓ CLAIMED</div>'
+        :allDone?`<button class="dd-claim-btn" onclick="window.claimDDReward()">▶ CLAIM</button>`
+        :`<button class="dd-claim-btn" disabled>${done}/3 DONE</button>`}
+    </div>
+  </div>`;
+}
+
+// ── Patch renderStatusPanel to include DNA (correct approach — replace at end) ──
+const _origRenderStatusFn = renderStatusPanel;
+window.renderStatusPanel = function(){
+  const base = _origRenderStatusFn();
+  const dnaInsert = `<div class="status-dna-section"><div class="status-dna-title">— 헌터 DNA — HUNTER STAT PROFILE</div>${buildDnaHtml(240)}</div>`;
+  // Insert before the last </div> of the panel
+  const lastDiv = base.lastIndexOf('</div>');
+  return base.slice(0,lastDiv) + dnaInsert + base.slice(lastDiv);
+};
+
+// ── Notify about new daily dungeon on load ──────────────────────────────────
+setTimeout(()=>{
+  if(!G) return;
+  const today=new Date().toLocaleDateString();
+  if(!G.dailyDungeon||G.dailyDungeon.date!==today){
+    showNotif({icon:'🌑',title:'DAILY DUNGEON SPAWNED',body:'New challenges await, Shadow Monarch.',color:'#7b2fff',duration:4000});
+  }
+  generateDailyDungeon();
+},1200);
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// SECTION 2A — SURVIVAL CHAIN STREAK
+// ══════════════════════════════════════════════════════════════════════════
+function buildStreakChain(streak){
+  const n = streak || 0;
+  // Color tier
+  const tier = n >= 30 ? 'fire-3' : n >= 7 ? 'fire-2' : n >= 1 ? 'fire-1' : '';
+  const tierColors = {
+    'fire-1': {ring:'#ff6600', bg:'rgba(255,102,0,.5)', count:'#ff8833'},
+    'fire-2': {ring:'#1e90ff', bg:'rgba(30,144,255,.5)', count:'#44aaff'},
+    'fire-3': {ring:'#7b2fff', bg:'rgba(123,47,255,.6)', count:'#a066ff'},
+    '':       {ring:'rgba(123,47,255,.35)', bg:'transparent', count:'rgba(200,216,248,.5)'},
+  };
+  const col = tierColors[tier];
+  // Build chain rings — show up to 7 rings (1 per day of week), then show count
+  const showRings = Math.min(n, 7);
+  let rings = '';
+  for(let i = 0; i < 7; i++){
+    const lit = i < showRings;
+    if(i > 0) rings += `<div class="chain-ring link ${lit?'lit':''}" style="--rc:${col.ring}"></div>`;
+    rings += `<div class="chain-ring ${lit?'lit':''}" style="--rc:${col.ring};--rb:${lit?col.bg:'transparent'}"></div>`;
+  }
+  // Tooltip text
+  const tips = {
+    0: 'Start your first quest to begin the chain',
+    1: 'Day 1 — The chain begins',
+    7: '7-day streak — Blue flame ignites!',
+    30: '30-day streak — SHADOW MONARCH DISCIPLINE',
+  };
+  const tipKey = n >= 30 ? 30 : n >= 7 ? 7 : n >= 1 ? 1 : 0;
+  const tip = tips[tipKey] || `${n}-day streak — keep going`;
+  // Milestone label
+  const milestone = n >= 30 ? '◈ MONARCH' : n >= 7 ? '◈ ASCENDING' : n >= 1 ? '◈ ACTIVE' : '';
+  return `<div class="streak-chain-wrap ${tier}" id="streakChain">
+    ${rings}
+    <span class="chain-count" style="color:${col.count}">${n}</span>
+    <span class="chain-label">${milestone||'DAYS'}</span>
+    <div class="streak-tooltip">${tip}</div>
+  </div>`;
+}
+
+// Animate chain rings in on first render
+function animateChainIn(){
+  const rings = document.querySelectorAll('#streakChain .chain-ring:not(.link)');
+  rings.forEach((r, i) => {
+    r.style.opacity = '0';
+    r.style.transform = 'scale(0)';
+    setTimeout(() => {
+      r.style.transition = 'opacity .3s ease, transform .3s cubic-bezier(.16,1,.3,1)';
+      r.style.opacity = '1';
+      r.style.transform = 'scale(1)';
+    }, i * 60 + 200);
+  });
+}
+
+// Streak break shatter animation
+function animateChainBreak(){
+  const rings = document.querySelectorAll('#streakChain .chain-ring.lit');
+  rings.forEach((r, i) => {
+    setTimeout(() => r.classList.add('shatter'), i * 40);
+  });
+  playSound('gate');
+  // Spawn break particles
+  const chain = document.getElementById('streakChain');
+  if(!chain) return;
+  for(let i = 0; i < 12; i++){
+    const p = document.createElement('div');
+    p.className = 'shatter-particle';
+    p.style.cssText = `width:${3+Math.random()*6}px;height:${2+Math.random()*4}px;
+      top:${Math.random()*100}%;left:${Math.random()*100}%;position:fixed;
+      --sx:${(Math.random()-.5)*80}px;--sy:${-20-Math.random()*60}px;--sr:${Math.random()*360}deg;
+      background:rgba(255,102,0,.8);animation-delay:${Math.random()*.2}s;z-index:9999`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 900);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// SECTION 2B — MISSION BOARD RENDERER
+// ══════════════════════════════════════════════════════════════════════════
+function buildMissionBoard(filtered, computeXPFn, acolors, afull, soldiers, hasPriorityFn, markPriorityFn, deleteTaskFn){
+  if(!filtered || filtered.length === 0) return '';
+
+  const active = filtered.filter(t => !t.done);
+  const done   = filtered.filter(t => t.done);
+
+  // Separate by rank
+  const sRank = active.filter(t => t.diff === 'S');
+  const aRank = active.filter(t => t.diff === 'A');
+  const lower  = active.filter(t => !['S','A'].includes(t.diff));
+
+  const rankColor = {S:'#ffcc00',A:'#ff6600',B:'#aa44ff',C:'#0099ff',D:'#00cc66',E:'#8a9ab0'};
+  const cmdAvail = hasPriorityFn() !== null;
+
+  let html = `<div class="mb-board-header">임무 게시판 · MISSION BOARD · ${active.length} ACTIVE</div>`;
+
+  // ── S-RANK WANTED POSTERS ────────────────────────────────────────────────
+  if(sRank.length > 0){
+    sRank.forEach(t => {
+      const xp = computeXPFn(t);
+      const ac = acolors[t.attr] || '#1e90ff';
+      html += `<div class="mb-wanted${t.done?' done':''}" onclick="if(!${t.done})window.completeTask(${t.id})">
+        <div class="mb-wanted-top">
+          <span class="mb-wanted-label">◈ S-RANK SUBJUGATION TARGET ◈</span>
+          <span class="mb-wanted-xp">${t.priority?'★':'+'}${xp} XP</span>
+        </div>
+        <div class="mb-wanted-body">
+          <div class="mb-wanted-skull">${t.done?'✓':'💀'}</div>
+          <div class="mb-wanted-content">
+            <div class="mb-wanted-name">${t.name}${t.daily?' <span style="font-size:9px;color:var(--cyan);opacity:.7">[DAILY]</span>':''}</div>
+            <div class="mb-wanted-tags">
+              <span class="tag tS">S-RANK</span>
+              <span class="attr-tag" style="color:${ac};border-color:${ac}40;background:${ac}12">${(afull[t.attr]||t.attr).toUpperCase()}</span>
+              ${t.priority ? '<span class="priority-tag">👑 PRIORITY</span>' : ''}
+            </div>
+          </div>
+          <div class="mb-wanted-check">${t.done?'✓':'?'}</div>
+        </div>
+        ${!t.done&&!t.priority&&cmdAvail?`<div style="padding:0 14px 10px"><button class="priority-mark-btn" onclick="event.stopPropagation();window.markPriority(${t.id})">👑 MARK PRIORITY</button></div>`:''}
+        <button class="delete-btn" style="position:absolute;top:8px;right:28px" onclick="event.stopPropagation();window.deleteTask(${t.id})">✕</button>
+      </div>`;
+    });
+  }
+
+  // ── A-RANK NOTICE BOARD ───────────────────────────────────────────────────
+  if(aRank.length > 0){
+    html += `<div class="mb-divider"><div class="mb-divider-line"></div><span class="mb-divider-label">A-RANK · ELITE CONTRACTS</span><div class="mb-divider-line"></div></div>`;
+    aRank.forEach(t => {
+      const xp = computeXPFn(t);
+      const ac = acolors[t.attr] || '#ff6600';
+      html += `<div class="mb-notice${t.done?' done':''}" style="--nc:#ff6600" onclick="if(!${t.done})window.completeTask(${t.id})">
+        <div class="mb-notice-rank">A</div>
+        <div class="mb-notice-name">${t.name}${t.daily?' <span style="font-size:9px;color:var(--cyan);opacity:.6">[D]</span>':''}</div>
+        <div class="mb-notice-meta">
+          <span class="mb-notice-xp">${t.priority?'★':'+'}${xp}</span>
+          <span class="mb-notice-attr" style="color:${ac}">${(afull[t.attr]||t.attr).toUpperCase().slice(0,3)}</span>
+        </div>
+        ${!t.done?`<button class="delete-btn" onclick="event.stopPropagation();window.deleteTask(${t.id})">✕</button>`:''}
+      </div>`;
+    });
+  }
+
+  // ── B/C/D/E STANDARD CARDS ────────────────────────────────────────────────
+  if(lower.length > 0){
+    // Group by rank
+    const groups = {};
+    lower.forEach(t => { (groups[t.diff] = groups[t.diff]||[]).push(t); });
+    ['B','C','D','E'].forEach(rank => {
+      const group = groups[rank];
+      if(!group || group.length === 0) return;
+      const rc = rankColor[rank] || '#888';
+      html += `<div class="mb-divider"><div class="mb-divider-line"></div><span class="mb-divider-label">${rank}-RANK · ${group.length} QUEST${group.length>1?'S':''}</span><div class="mb-divider-line"></div></div>`;
+      group.forEach(t => {
+        const xp = computeXPFn(t);
+        const ac = acolors[t.attr] || rc;
+        html += `<div class="mb-card${t.done?' done':''}${t.priority&&!t.done?' priority':''}" style="--mc:${rc}" onclick="if(!${t.done})window.completeTask(${t.id})">
+          <div class="mb-card-rank">${rank}</div>
+          <div class="mb-card-name">${t.name}</div>
+          ${t.daily?`<div class="mb-card-daily">[D]</div>`:''}
+          ${t.priority?`<div class="mb-card-daily" style="color:#ff6600">👑</div>`:''}
+          <div class="mb-card-xp">+${xp}</div>
+          ${t.done?`<div class="mb-card-check">✓</div>`:
+            `<button class="delete-btn" onclick="event.stopPropagation();window.deleteTask(${t.id})">✕</button>`}
+        </div>`;
+      });
+    });
+  }
+
+  // ── DONE SECTION ──────────────────────────────────────────────────────────
+  if(done.length > 0){
+    html += `<div class="mb-done-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+      ▸ ${done.length} COMPLETED QUEST${done.length>1?'S':''} — TAP TO SHOW
+    </div><div style="display:none">`;
+    done.forEach(t => {
+      html += `<div class="mb-card done" style="--mc:rgba(0,200,100,.3)">
+        <div class="mb-card-rank" style="color:rgba(0,200,100,.6)">${t.diff}</div>
+        <div class="mb-card-name">${t.name}</div>
+        <div class="mb-card-check">✓</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  return html;
+}
+
+// ── Post-render: animate chain rings in ────────────────────────────────────
+const _prevRenderSection2 = window.render;
+window.render = function(){
+  const prevStreak = G ? G.streak : 0;
+  _prevRenderSection2();
+  requestAnimationFrame(() => {
+    animateChainIn();
+    // Check if streak just broke (streak went down)
+    if(G && G.streak === 0 && prevStreak > 0){
+      animateChainBreak();
+    }
+  });
+};
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// SECTION 3A — DUNGEON RAID TIMER MODE
+// ══════════════════════════════════════════════════════════════════════════
+window._raidActive    = false;
+window._raidStartTime = null;
+window._raidBossShown = false;
+
+const RAID_MESSAGES = {
+  'FOCUS GATE':    ['Gate detected ahead...','Mana signatures rising...','Portal stabilizing...','You step through the gate.'],
+  'DEEP DUNGEON':  ['Descending into darkness...','Echoes from below...','Ancient power stirs...','The dungeon welcomes you.'],
+  'RAID MODE':     ['Raid formation engaged.','Shadow army on standby.','Monarch preparing assault.','The raid begins.'],
+  'SHORT REST':    ['Recovery chamber found.','Mana restoring...','Brief respite granted.','Resting in the shadows.'],
+  'LONG REST':     ['Deep recovery initiated.','Shadow wounds healing...','Strength returning.','The Monarch rests.'],
+};
+
+const BOSS_QUOTES = [
+  'A boss monster lurks ahead — you cannot retreat now.',
+  'You sense overwhelming power. The boss is close.',
+  'Your shadow soldiers warn you — the boss has awoken.',
+  'Critical phase — abandoning now means defeat.',
+];
+
+function getRaidMessages(label){ return RAID_MESSAGES[label] || RAID_MESSAGES['FOCUS GATE']; }
+
+function startRaidAtmo(label){
+  window._raidActive = true;
+  window._raidStartTime = Date.now();
+  window._raidBossShown = false;
+  const atmo = document.getElementById('raidAtmo');
+  const status = document.getElementById('raidStatus');
+  const depth = document.getElementById('raidDepth');
+  const wrap = document.getElementById('raidTimerWrap');
+  if(atmo) atmo.classList.add('active');
+  if(status) status.classList.add('active');
+  if(wrap) wrap.classList.add('raid-mode-active');
+  // Sequence atmospheric messages
+  const msgs = getRaidMessages(label);
+  let mi = 0;
+  const msgInterval = setInterval(()=>{
+    if(!window._raidActive){ clearInterval(msgInterval); return; }
+    if(status) status.textContent = msgs[mi % msgs.length];
+    mi++;
+    if(mi >= msgs.length) clearInterval(msgInterval);
+  }, 1800);
+  // Final message
+  setTimeout(()=>{
+    if(!window._raidActive) return;
+    if(status) status.textContent = '— DUNGEON RAID IN PROGRESS —';
+    if(depth) depth.textContent = label.toUpperCase() + ' · FLOOR B1';
+  }, msgs.length * 1800 + 200);
+  // Spawn ambient particles around timer circle
+  spawnRaidParticles();
+  // Play enter sound
+  playSound('gate');
+  setTimeout(()=>playSound('arise'), 400);
+}
+
+function stopRaidAtmo(){
+  window._raidActive = false;
+  const atmo = document.getElementById('raidAtmo');
+  const status = document.getElementById('raidStatus');
+  const depth = document.getElementById('raidDepth');
+  const warn = document.getElementById('bossWarning');
+  const wrap = document.getElementById('raidTimerWrap');
+  if(atmo) atmo.classList.remove('active');
+  if(status){ status.classList.remove('active'); status.textContent = '— GATE CLOSED —'; }
+  if(depth) depth.textContent = 'SELECT A DUNGEON BELOW';
+  if(warn) warn.classList.remove('show');
+  if(wrap) wrap.classList.remove('raid-mode-active');
+  window._raidBossShown = false;
+}
+
+function checkBossWarning(){
+  if(!window._raidActive || !timerRunning) return;
+  const pct = timerSecs / timerMax;
+  const warn = document.getElementById('bossWarning');
+  if(!warn) return;
+  // Boss warning at 25% time remaining
+  if(pct <= 0.25 && !window._raidBossShown){
+    window._raidBossShown = true;
+    warn.classList.add('show');
+    warn.textContent = '⚠ ' + BOSS_QUOTES[Math.floor(Math.random()*BOSS_QUOTES.length)] + ' ⚠';
+    playSound('quest');
+    // Screen shake
+    const app = document.getElementById('app');
+    if(app){ app.classList.add('shake'); setTimeout(()=>app.classList.remove('shake'), 380); }
+  }
+  if(pct > 0.25 && warn.classList.contains('show')) warn.classList.remove('show');
+}
+
+function spawnRaidParticles(){
+  if(!window._raidActive) return;
+  const wrap = document.querySelector('.timer-circle-wrap');
+  if(!wrap) return;
+  for(let i=0;i<6;i++){
+    setTimeout(()=>{
+      if(!window._raidActive) return;
+      const p = document.createElement('div');
+      p.className = 'raid-particle';
+      const sz = 2+Math.random()*5;
+      const angle = Math.random()*Math.PI*2;
+      const dist = 80+Math.random()*40;
+      p.style.cssText = `width:${sz}px;height:${sz}px;
+        left:${90+Math.cos(angle)*dist}px;top:${90+Math.sin(angle)*dist}px;
+        --rpx:${(Math.random()-.5)*60}px;--rpy:${-20-Math.random()*60}px;
+        --rpd:${.8+Math.random()*.6}s`;
+      wrap.appendChild(p);
+      setTimeout(()=>p.remove(), 1500);
+    }, i * 200);
+  }
+  if(window._raidActive) setTimeout(spawnRaidParticles, 1800);
+}
+
+// Raid timer toggle — wraps existing timerToggle
+window.raidTimerToggle = function(){
+  if(timerRunning){
+    // Pausing — check if boss warning is active
+    if(window._raidBossShown && window._raidActive){
+      // Show abandon confirmation
+      showAbandonWarning();
+      return;
+    }
+    timerToggle();
+    stopRaidAtmo();
+  } else {
+    // Starting
+    timerToggle();
+    startRaidAtmo(timerLabel);
+  }
+};
+
+// Override timerReset to also stop raid atmo
+const _origTimerReset3 = window.timerReset;
+window.timerReset = function(){
+  _origTimerReset3();
+  stopRaidAtmo();
+};
+
+// Override setPreset to reset raid state  
+const _origSetPreset3 = window.setPreset;
+window.setPreset = function(m, l){
+  _origSetPreset3(m, l);
+  stopRaidAtmo();
+};
+
+// Check boss warning on a separate interval when raid is active
+setInterval(()=>{ if(window._raidActive && timerRunning) checkBossWarning(); }, 3000);
+
+// Abandon warning modal
+function showAbandonWarning(){
+  let modal = document.getElementById('abandonGhost');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'abandonGhost';
+    modal.className = 'abandon-ghost';
+    modal.innerHTML = `<div class="abandon-ghost-box">
+      <div class="abandon-ghost-title">⚠ ABANDON RAID?</div>
+      <div class="abandon-ghost-img">💀</div>
+      <div class="abandon-ghost-body">
+        The boss is close. Shadow Monarchs<br>do not flee from battle.<br><br>
+        Abandoning now means no reward<br>and your soldiers will weaken.
+      </div>
+      <div class="abandon-ghost-btns">
+        <button class="abandon-keep-btn" onclick="window.continueRaid()">▶ CONTINUE</button>
+        <button class="abandon-quit-btn" onclick="window.abandonRaid()">✕ ABANDON</button>
+      </div>
+    </div>`;
+    document.body.appendChild(modal);
+  }
+  requestAnimationFrame(()=> modal.classList.add('show'));
+}
+
+window.continueRaid = function(){
+  const modal = document.getElementById('abandonGhost');
+  if(modal) modal.classList.remove('show');
+};
+
+window.abandonRaid = function(){
+  const modal = document.getElementById('abandonGhost');
+  if(modal) modal.classList.remove('show');
+  timerToggle();   // pause
+  stopRaidAtmo();
+  // Penalty: small soldier XP loss notification
+  showNotif({icon:'💀',title:'RAID ABANDONED',body:'The Shadow Monarch retreats... for now.',color:'#ff4444',duration:3500});
+  playSound('gate');
+};
+
+// Session complete — enhanced for raid mode
+const _origOnSessionComplete = onSessionComplete;
+window.onSessionComplete = function(mins, label){
+  const wasRaid = window._raidActive;
+  stopRaidAtmo();
+  _origOnSessionComplete(mins, label);
+  if(wasRaid){
+    // Bonus boss kill animation
+    setTimeout(()=>{
+      triggerBossBattle(mins * 3); // Visual boss fight on raid complete
+      showNotif({icon:'🌑',title:'RAID COMPLETE',body:`${label} — ${mins} min · Boss defeated!`,color:'#ffcc00',duration:4000});
+    }, 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// SECTION 3B — AI QUEST GENERATOR
+// ══════════════════════════════════════════════════════════════════════════
+let _qgenGoal = '';
+let _qgenFocus = 'all';
+let _qgenResults = [];
+let _qgenLoading = false;
+let _qgenAddedIdx = new Set();
+
+function renderQGenPanel(){
+  const focusOptions = [
+    {k:'all',     label:'All Attrs'},
+    {k:'physique',label:'Physique'},
+    {k:'vitality',label:'Vitality'},
+    {k:'intellect',label:'Intellect'},
+    {k:'willpower',label:'Willpower'},
+    {k:'charisma', label:'Charisma'},
+    {k:'spiritual',label:'Spiritual'},
+  ];
+  const chips = focusOptions.map(o=>`<div class="qgen-chip${_qgenFocus===o.k?' active':''}" onclick="window.qgenSetFocus('${o.k}')">${o.label}</div>`).join('');
+
+  let resultsHtml = '';
+  if(_qgenLoading){
+    resultsHtml = `<div class="qgen-result">
+      <div class="qgen-loading">
+        <span>🌑</span>
+        <span>Consulting the System<span class="qgen-loading-dots"></span></span>
+      </div>
+    </div>`;
+  } else if(_qgenResults.length > 0){
+    const rankColors = {S:'#ffcc00',A:'#ff6600',B:'#aa44ff',C:'#0099ff',D:'#00cc66',E:'#8a9ab0'};
+    const items = _qgenResults.map((q,i)=>{
+      const rc = rankColors[q.diff] || '#888';
+      const ac = (typeof ACOLORS !== 'undefined' ? ACOLORS[q.attr] : null) || '#7b2fff';
+      const added = _qgenAddedIdx.has(i);
+      return `<div class="qgen-quest-item ${added?'added':''}" onclick="window.qgenAddQuest(${i})">
+        <div class="qgen-quest-rank" style="color:${rc}">${q.diff}</div>
+        <div class="qgen-quest-name">${q.name}</div>
+        <div class="qgen-quest-attr" style="color:${ac}">${(q.attr||'').slice(0,3).toUpperCase()}</div>
+        <div class="qgen-quest-add">${added?'✓':'+ADD'}</div>
+      </div>`;
+    }).join('');
+    const allAdded = _qgenResults.every((_,i)=>_qgenAddedIdx.has(i));
+    resultsHtml = `<div class="qgen-result">
+      <div class="qgen-result-header">
+        <span class="qgen-result-label">— ${_qgenResults.length} QUESTS GENERATED —</span>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(200,216,248,.3)">CLICK TO ADD</span>
+      </div>
+      ${items}
+      ${!allAdded?`<button class="qgen-add-all-btn" onclick="window.qgenAddAll()">▶ ADD ALL TO QUEST BOARD</button>`:''}
+    </div>`;
+  }
+
+  return `<div class="qgen-wrap">
+    <div class="qgen-header">
+      <div class="qgen-title">— 퀘스트 생성기 — AI QUEST GENERATOR</div>
+      <div class="qgen-ko">시스템 AI</div>
+    </div>
+    <div class="qgen-form">
+      <div class="qgen-input-wrap">
+        <input class="qgen-input" id="qgenInput" placeholder="Describe your goal... (e.g. get fit, finish project, be more social)"
+          value="${_qgenGoal.replace(/"/g,'&quot;')}"
+          onkeydown="if(event.key==='Enter')window.qgenGenerate()"
+          oninput="window._qgenGoal=this.value"/>
+        <button class="qgen-btn" id="qgenBtn" onclick="window.qgenGenerate()" ${_qgenLoading?'disabled':''}>
+          ${_qgenLoading?'LOADING':'▶ GENERATE'}
+        </button>
+      </div>
+      <div class="qgen-options">${chips}</div>
+    </div>
+    ${resultsHtml}
+  </div>`;
+}
+
+window.qgenSetFocus = function(k){
+  _qgenFocus = k;
+  const panel = document.getElementById('qgenPanel');
+  if(panel) panel.innerHTML = renderQGenPanel();
+};
+
+window.qgenGenerate = async function(){
+  const input = document.getElementById('qgenInput');
+  _qgenGoal = (input ? input.value.trim() : _qgenGoal);
+  if(!_qgenGoal){ return; }
+  _qgenLoading = true;
+  _qgenResults = [];
+  _qgenAddedIdx = new Set();
+  const panel = document.getElementById('qgenPanel');
+  if(panel) panel.innerHTML = renderQGenPanel();
+
+  // Build context for Claude
+  const rank = G ? (typeof HUNTER_RANKS !== 'undefined' ? HUNTER_RANKS[G.rankIndex].rank : 'E') : 'E';
+  const weakAttr = G ? (typeof DNA_KEYS !== 'undefined' ? DNA_KEYS.slice().sort((a,b)=>(G.attrCounts[a]||0)-(G.attrCounts[b]||0))[0] : 'willpower') : 'willpower';
+  const focusInstruction = _qgenFocus === 'all' ? `Focus on the hunter's weakest attribute (${weakAttr}) but include variety.` : `Focus mostly on the ${_qgenFocus} attribute.`;
+  const prompt = `You are the System from Solo Leveling, an AI that assigns quests to hunters to help them grow.
+
+Hunter Profile:
+- Rank: ${rank}
+- Goal: "${_qgenGoal}"
+- Weakest attribute: ${weakAttr}
+- ${focusInstruction}
+
+Generate exactly 6 real-world actionable quests that help achieve this goal. Each quest should be specific, achievable today or this week, and tied to an attribute.
+
+Respond ONLY with a JSON array, no markdown, no explanation:
+[
+  {"name": "Quest description (specific and actionable)", "diff": "C", "attr": "physique"},
+  ...
+]
+
+Rules:
+- name: clear action, max 80 chars, no quotes inside
+- diff: one of E/D/C/B/A/S (match difficulty to how hard the task is)
+- attr: one of physique/vitality/intellect/willpower/charisma/spiritual
+- Make quests feel like Solo Leveling system quests — direct, powerful language
+- Mix difficulties: mostly C/D, one B or A if the goal is ambitious`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content||[]).map(b=>b.text||'').join('').trim();
+    // Strip any markdown fences
+    const clean = text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    if(Array.isArray(parsed) && parsed.length > 0){
+      _qgenResults = parsed.slice(0,6).map(q=>({
+        name: (q.name||'Complete this quest').slice(0,80),
+        diff: ['E','D','C','B','A','S'].includes(q.diff) ? q.diff : 'C',
+        attr: ['physique','vitality','intellect','willpower','charisma','spiritual'].includes(q.attr) ? q.attr : 'willpower',
+      }));
+    } else {
+      throw new Error('Invalid response format');
+    }
+  } catch(err){
+    console.error('QGen error:',err);
+    _qgenResults = [{name:'ERROR: Could not reach System. Check connection.',diff:'E',attr:'willpower'}];
+  }
+  _qgenLoading = false;
+  const panel2 = document.getElementById('qgenPanel');
+  if(panel2) panel2.innerHTML = renderQGenPanel();
+};
+
+window.qgenAddQuest = function(idx){
+  if(_qgenAddedIdx.has(idx)) return;
+  const q = _qgenResults[idx];
+  if(!q || !G) return;
+  const accentMap = {E:'#8a9ab0',D:'#00cc66',C:'#0099ff',B:'#aa44ff',A:'#ff6600',S:'#ffcc00'};
+  const task = {
+    id: Date.now()+Math.random(),
+    name: q.name, diff: q.diff, attr: q.attr,
+    category: 'Personal', time:'', duration:null,
+    daily:false, done:false, priority:false,
+    accent: accentMap[q.diff]||'#7b2fff'
+  };
+  task.xp = computeXP(task);
+  G.tasks.push(task);
+  _qgenAddedIdx.add(idx);
+  playSound('gate');
+  showNotif({icon:SOLDIERS[q.attr]?.icon||'⚔',title:'QUEST REGISTERED',body:q.name,color:ACOLORS[q.attr]||'#7b2fff',duration:2000});
+  saveState();
+  // Re-render just the qgen panel without full render
+  const panel = document.getElementById('qgenPanel');
+  if(panel) panel.innerHTML = renderQGenPanel();
+  // Also refresh the mission board
+  const missionBoard = document.querySelector('.mission-board');
+  if(missionBoard) missionBoard.innerHTML = buildMissionBoard(
+    G.tasks.filter(t=>questFilter==='all'?true:questFilter==='active'?!t.done:questFilter==='done'?t.done:t.attr===questFilter),
+    computeXP, ACOLORS, AFULL, SOLDIERS, hasPriorityAvail, markPriority, deleteTask
+  );
+};
+
+window.qgenAddAll = function(){
+  _qgenResults.forEach((_,i)=>{ if(!_qgenAddedIdx.has(i)) window.qgenAddQuest(i); });
 };
 
 </script>
