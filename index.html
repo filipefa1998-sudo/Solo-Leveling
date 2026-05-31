@@ -2346,7 +2346,7 @@ function renderApp(){
     </div>
 
     <div class="tabs">
-      ${['quests','army','dungeon','titles','status','timer','calendar'].map(t=>`<button class="tab-btn${activeTab===t?' active':''}" onclick="(window._gatedSwitchTab||switchTab)('${t}')">${{quests:'Daily Quests',army:'Shadow Army',titles:'Titles',status:'Status Window',timer:'Focus Gate',calendar:'Dungeon Log'}[t]}</button>`).join('')}
+      ${['quests','army','dungeon','titles','status','timer','calendar'].map(t=>`<button class="tab-btn${activeTab===t?' active':''}" onclick="(window._gatedSwitchTab||switchTab)('${t}')">${{quests:'Daily Quests',army:'Shadow Army',dungeon:'Daily Dungeon',titles:'Titles',status:'Status Window',timer:'Focus Gate',calendar:'Dungeon Log'}[t]||t.toUpperCase()}</button>`).join('')}
     </div>
 
     <div id="panel-quests" class="panel${activeTab==='quests'?' active':''}">
@@ -2992,6 +2992,7 @@ window.confirmName      = confirmName;
 window.skipName         = skipName;
 window.closeRankup      = closeRankup;
 window.timerToggle      = timerToggle;
+window.toggleAmbience   = function(){ _resumeAC(); toggleAmbience(); };
 window.timerReset       = timerReset;
 window.setPreset        = setPreset;
 window.calNav           = calNav;
@@ -3006,14 +3007,14 @@ window.completeTask     = function(taskId){
   const task=G&&G.tasks&&G.tasks.find(t=>t.id==taskId);
   if(!task||task.done)return;
   completeTask(taskId);
-  const xp=task.xp||0;
-  // Boss battle removed — all ranks use combat slash
-  setTimeout(()=>triggerCombatSlash(xp, task.diff==='S'),200);
-  if(task){
-    if(task.diff==='S') setTimeout(()=>triggerBossBattle(computeXP(task)*2),300);
-    const iw=document.getElementById('idleJinwoo');
-    if(iw){iw.classList.remove('nod','fist','arms-cross');void iw.offsetWidth;iw.classList.add('nod');setTimeout(()=>iw.classList.remove('nod'),600);}
+  const xp=task.xp||computeXP(task)||0;
+  if(task.diff==='S'){
+    setTimeout(()=>triggerBossBattle(xp*2),300);
+  } else {
+    setTimeout(()=>triggerCombatSlash(xp,false),200);
   }
+  const iw=document.getElementById('idleJinwoo');
+  if(iw){iw.classList.remove('nod','fist','arms-cross');void iw.offsetWidth;iw.classList.add('nod');setTimeout(()=>iw.classList.remove('nod'),600);}
 };
 window.startHunter = function(){
   _resumeAC();
