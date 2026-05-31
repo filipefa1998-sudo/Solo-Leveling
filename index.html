@@ -2242,6 +2242,7 @@ function setTitleFilter(cat){titleFilter=cat;render()}
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
 let activeTab='quests',questFilter='all'
+var _qgenGoal = '', _qgenFocus = 'all', _qgenResults = [], _qgenLoading = false, _qgenAddedIdx = new Set();
 
 function render(){
   if(!G){renderAuth();return}
@@ -4458,11 +4459,7 @@ window.onSessionComplete = function(mins, label){
 // ══════════════════════════════════════════════════════════════════════════
 // SECTION 3B — AI QUEST GENERATOR
 // ══════════════════════════════════════════════════════════════════════════
-var _qgenGoal = '';
-var _qgenFocus = 'all';
-var _qgenResults = [];
-var _qgenLoading = false;
-var _qgenAddedIdx = new Set();
+// qgen vars moved to top of script
 
 function renderQGenPanel(){
   const focusOptions = [
@@ -4477,6 +4474,8 @@ function renderQGenPanel(){
   const chips = focusOptions.map(o=>`<div class="qgen-chip${_qgenFocus===o.k?' active':''}" onclick="window.qgenSetFocus('${o.k}')">${o.label}</div>`).join('');
 
   let resultsHtml = '';
+  if(!_qgenResults) _qgenResults = [];
+  if(!_qgenAddedIdx) _qgenAddedIdx = new Set();
   if(_qgenLoading){
     resultsHtml = `<div class="qgen-result">
       <div class="qgen-loading">
