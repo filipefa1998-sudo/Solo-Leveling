@@ -3629,15 +3629,23 @@ function updateIdleImage(){
   const iw=document.getElementById('idleJinwoo');if(!iw||!G)return;
   const rank=HUNTER_RANKS[G.rankIndex].rank;
   const src=RANK_IMGS[rank]||RANK_IMGS['E'];
-  if(!iw.querySelector('img')){
+  const existing=iw.querySelector('img');
+  if(!existing){
     const img=document.createElement('img');
     img.src=src;img.alt='Hunter';
+    img.setAttribute('data-rank',rank);
+    img.style.cssText='width:100%;height:100%;object-fit:cover;object-position:top center;display:block';
     iw.appendChild(img);
   } else {
-    const img=iw.querySelector('img');
-    if(img.src!==src){
-      img.style.opacity='0';
-      setTimeout(()=>{img.src=src;img.style.transition='opacity .4s';img.style.opacity='1';},200);
+    // Compare rank letter not full data URI string (avoids encoding mismatch)
+    if(existing.getAttribute('data-rank')!==rank){
+      existing.style.transition='opacity .35s';
+      existing.style.opacity='0';
+      setTimeout(()=>{
+        existing.src=src;
+        existing.setAttribute('data-rank',rank);
+        existing.style.opacity='1';
+      },200);
     }
   }
 }
@@ -3657,7 +3665,7 @@ function showRankReveal(rankObj){
           <div class="rank-reveal-title" id="rankRevealTitle"></div>
           <span class="rank-reveal-ko" id="rankRevealKo"></span>
         </div>
-        <div class="rank-reveal-close" onclick="closeRankReveal()">[ TAP TO CONTINUE ]</div>
+        <div class="rank-reveal-close" onclick="window.closeRankReveal&&window.closeRankReveal()">[ TAP TO CONTINUE ]</div>
       </div>`;
     document.body.appendChild(ov);
   }
@@ -3724,7 +3732,10 @@ window.triggerRankTransformation=function triggerRankTransformationImg(rankObj){
 const _origShowHunterRankupImg=window.showHunterRankup;
 window.showHunterRankup=function(ri){
   _origShowHunterRankupImg(ri);
-  setTimeout(updateIdleImage, 2200);
+  // Force immediate image update + delayed update after animation completes
+  setTimeout(updateIdleImage, 100);
+  setTimeout(updateIdleImage, 1000);
+  setTimeout(updateIdleImage, 2500);
 };
 
 // Boot: load current rank image
